@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weekdays Spelling Challenge</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #cfe8f7;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 450px;
+      margin: auto;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #fff4b3;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📅 Weekdays Spelling Challenge</h2>
+<div id="score">Score: 0</div>
+
+<div class="box" id="quiz"></div>
+<div id="result"></div>
+
+<script>
+let questions = [
+  {q: "Choose the correct spelling:", options: ["Monday", "Mondey", "Mondai"], answer: 0},
+  {q: "Choose the correct spelling:", options: ["Tuesday", "Tusday", "Tuesdey"], answer: 0},
+  {q: "Choose the correct spelling:", options: ["Wednesday", "Wensday", "Wednsday"], answer: 0},
+  {q: "Choose the correct spelling:", options: ["Thursday", "Thrusday", "Thersday"], answer: 0},
+  {q: "Choose the correct spelling:", options: ["Friday", "Fridai", "Fridy"], answer: 0},
+  {q: "Choose the correct spelling:", options: ["Saturday", "Saterday", "Satuday"], answer: 0},
+  {q: "Choose the correct spelling:", options: ["Sunday", "Sonday", "Sundey"], answer: 0}
+];
+
+let current = 0;
+let score = 0;
+let currentShuffledOptions = [];
+let correctTextForCurrentQuestion = "";
+
+let clickSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+let correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg");
+let wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function loadQuestion() {
+  if (current >= questions.length) {
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("result").innerHTML =
+      "🎉 Finished! Final Score: " + score + " / " + questions.length;
+    return;
+  }
+
+  let q = questions[current];
+  correctTextForCurrentQuestion = q.options[q.answer];
+  currentShuffledOptions = shuffle([...q.options]);
+
+  let html = `<p><b>${q.q}</b></p>`;
+
+  currentShuffledOptions.forEach((opt, index) => {
+    html += `<button onclick="check(${index})">${opt}</button>`;
+  });
+
+  document.getElementById("quiz").innerHTML = html;
+}
+
+function check(selectedIndex) {
+  clickSound.play();
+
+  let selectedText = currentShuffledOptions[selectedIndex];
+  let buttons = document.querySelectorAll("#quiz button");
+
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    let btnText = currentShuffledOptions[idx];
+
+    if (btnText === correctTextForCurrentQuestion) {
+      btn.style.background = "#a8e6a3";
+    }
+    if (idx === selectedIndex && selectedText !== correctTextForCurrentQuestion) {
+      btn.style.background = "#ffb3b3";
+    }
+  });
+
+  if (selectedText === correctTextForCurrentQuestion) {
+    score++;
+    correctSound.play();
+  } else {
+    wrongSound.play();
+  }
+
+  document.getElementById("score").innerText = "Score: " + score;
+
+  setTimeout(() => {
+    current++;
+    loadQuestion();
+  }, 1200);
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
