@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noun Basket Game</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#dff9fb;
+    text-align:center;
+}
+
+h1{
+    color:#ff6b6b;
+}
+
+.cards{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+    margin:20px;
+}
+
+.card{
+    width:120px;
+    padding:10px;
+    background:white;
+    border-radius:15px;
+    cursor:grab;
+    box-shadow:0 4px 8px gray;
+    font-size:22px;
+}
+
+.drop-area{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    margin-top:30px;
+}
+
+.basket{
+    width:220px;
+    height:220px;
+    border:5px dashed orange;
+    border-radius:20px;
+    background:#fff3cd;
+    font-size:26px;
+    padding-top:20px;
+}
+
+#wrong{
+    border-color:#4dabf7;
+    background:#d0ebff;
+}
+
+#message{
+    font-size:30px;
+    margin-top:25px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧺 Drag the Nouns into the Basket!</h1>
+
+<div class="cards">
+
+<div class="card" draggable="true" id="teacher">👩 Teacher</div>
+
+<div class="card" draggable="true" id="dog">🐶 Dog</div>
+
+<div class="card" draggable="true" id="school">🏫 School</div>
+
+<div class="card" draggable="true" id="ball">⚽ Ball</div>
+
+<div class="card" draggable="true" id="jump">🏃 Jump</div>
+
+<div class="card" draggable="true" id="run">🏃 Run</div>
+
+</div>
+
+<div class="drop-area">
+
+<div class="basket" id="noun">
+🧺<br>NOUNS
+</div>
+
+<div class="basket" id="wrong">
+❌<br>NOT A NOUN
+</div>
+
+</div>
+
+<div id="message"></div>
+
+<script>
+
+let nouns=["teacher","dog","school","ball"];
+
+document.querySelectorAll(".card").forEach(card=>{
+card.addEventListener("dragstart",drag);
+});
+
+function drag(e){
+e.dataTransfer.setData("text",e.target.id);
+}
+
+document.querySelectorAll(".basket").forEach(box=>{
+
+box.addEventListener("dragover",e=>e.preventDefault());
+
+box.addEventListener("drop",function(e){
+
+e.preventDefault();
+
+let id=e.dataTransfer.getData("text");
+let item=document.getElementById(id);
+
+if(this.id=="noun"){
+
+if(nouns.includes(id)){
+this.appendChild(item);
+message.innerHTML="🎉 Great! That's a noun!";
+message.style.color="green";
+}else{
+message.innerHTML="❌ Oops! That's not a noun.";
+message.style.color="red";
+}
+
+}else{
+
+if(!nouns.includes(id)){
+this.appendChild(item);
+message.innerHTML="👏 Correct!";
+message.style.color="green";
+}else{
+message.innerHTML="❌ That's actually a noun!";
+message.style.color="red";
+}
+
+}
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
