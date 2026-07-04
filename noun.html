@@ -1,155 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Noun Basket Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noun Sorting Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
 
-<style>
-body{
-    font-family:Arial,sans-serif;
-    background:#dff9fb;
-    text-align:center;
-}
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-h1{
-    color:#ff6b6b;
-}
+        p {
+            color: #666;
+            margin-bottom: 25px;
+        }
 
-.cards{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:15px;
-    margin:20px;
-}
+        /* Container for words to be dragged */
+        #words-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            max-width: 800px;
+            justify-content: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            min-height: 50px;
+        }
 
-.card{
-    width:120px;
-    padding:10px;
-    background:white;
-    border-radius:15px;
-    cursor:grab;
-    box-shadow:0 4px 8px gray;
-    font-size:22px;
-}
+        .draggable {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: grab;
+            font-weight: bold;
+            user-select: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
 
-.drop-area{
-    display:flex;
-    justify-content:center;
-    gap:40px;
-    margin-top:30px;
-}
+        .draggable:active {
+            cursor: grabbing;
+        }
 
-.basket{
-    width:220px;
-    height:220px;
-    border:5px dashed orange;
-    border-radius:20px;
-    background:#fff3cd;
-    font-size:26px;
-    padding-top:20px;
-}
+        .draggable.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
 
-#wrong{
-    border-color:#4dabf7;
-    background:#d0ebff;
-}
+        /* Categories Grid */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
 
-#message{
-    font-size:30px;
-    margin-top:25px;
-    font-weight:bold;
-}
-</style>
+        @media (min-width: 600px) {
+            .categories-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .category-box {
+            background: #fff;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .category-box.drag-over {
+            background-color: #e8f4f8;
+            border-color: #3498db;
+        }
+
+        .category-box h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #f1f3f5;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 8px;
+        }
+
+        /* Styling for words inside the categories */
+        .category-box .draggable {
+            margin-bottom: 8px;
+            width: 80%;
+            text-align: center;
+            background-color: #2ecc71; /* Changes to green when sorted */
+        }
+
+        #reset-btn {
+            margin-top: 25px;
+            padding: 12px 24px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        #reset-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
-
 <body>
 
-<h1>🧺 Drag the Nouns into the Basket!</h1>
+    <h1>Noun Sorting Game</h1>
+    <p>Drag each noun below and drop it into its correct category!</p>
 
-<div class="cards">
+    <div id="words-container">
+        <div class="draggable" draggable="true" data-category="person">Teacher</div>
+        <div class="draggable" draggable="true" data-category="place">Paris</div>
+        <div class="draggable" draggable="true" data-category="thing">Laptop</div>
+        <div class="draggable" draggable="true" data-category="animal">Lion</div>
+        <div class="draggable" draggable="true" data-category="person">Doctor</div>
+        <div class="draggable" draggable="true" data-category="place">Library</div>
+        <div class="draggable" draggable="true" data-category="thing">Guitar</div>
+        <div class="draggable" draggable="true" data-category="animal">Penguin</div>
+    </div>
 
-<div class="card" draggable="true" id="teacher">👩 Teacher</div>
+    <div class="categories-grid">
+        <div class="category-box" data-type="person">
+            <h2>Person</h2>
+        </div>
+        <div class="category-box" data-type="place">
+            <h2>Place</h2>
+        </div>
+        <div class="category-box" data-type="thing">
+            <h2>Thing</h2>
+        </div>
+        <div class="category-box" data-type="animal">
+            <h2>Animal</h2>
+        </div>
+    </div>
 
-<div class="card" draggable="true" id="dog">🐶 Dog</div>
+    <button id="reset-btn" onclick="resetGame()">Reset Game</button>
 
-<div class="card" draggable="true" id="school">🏫 School</div>
+    <script>
+        const draggables = document.querySelectorAll('.draggable');
+        const containers = document.querySelectorAll('.category-box, #words-container');
 
-<div class="card" draggable="true" id="ball">⚽ Ball</div>
+        draggables.forEach(draggable => {
+            // Triggered when user starts dragging a word
+            draggable.addEventListener('dragstart', () => {
+                draggable.classList.add('dragging');
+            });
 
-<div class="card" draggable="true" id="jump">🏃 Jump</div>
+            // Triggered when dragging finishes
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+            });
+        });
 
-<div class="card" draggable="true" id="run">🏃 Run</div>
+        containers.forEach(container => {
+            // Allows the drop to happen (default browser behavior blocks it)
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (container.classList.contains('category-box')) {
+                    container.classList.add('drag-over');
+                }
+            });
 
-</div>
+            // Visual indicator when leaving a dropzone
+            container.addEventListener('dragleave', () => {
+                container.classList.remove('drag-over');
+            });
 
-<div class="drop-area">
+            // Handles the actual drop logic
+            container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                container.classList.remove('drag-over');
+                
+                const draggingElement = document.querySelector('.dragging');
+                const targetCategory = container.getAttribute('data-type');
+                const correctCategory = draggingElement.getAttribute('data-category');
 
-<div class="basket" id="noun">
-🧺<br>NOUNS
-</div>
+                // Validation: Only append if dropping back in word-bank OR if it matches the correct category
+                if (!targetCategory || targetCategory === correctCategory) {
+                    container.appendChild(draggingElement);
+                    
+                    // Style change based on location
+                    if (!targetCategory) {
+                        draggingElement.style.backgroundColor = '#3498db'; // Back to blue in bank
+                    } else {
+                        draggingElement.style.backgroundColor = '#2ecc71'; // Green for correct drop
+                    }
+                } else {
+                    // Optional: Visual feedback for an incorrect match
+                    draggingElement.style.animation = "shake 0.5s";
+                    alert(`Oops! That's not the right category for "${draggingElement.innerText}".`);
+                }
+            });
+        });
 
-<div class="basket" id="wrong">
-❌<br>NOT A NOUN
-</div>
-
-</div>
-
-<div id="message"></div>
-
-<script>
-
-let nouns=["teacher","dog","school","ball"];
-
-document.querySelectorAll(".card").forEach(card=>{
-card.addEventListener("dragstart",drag);
-});
-
-function drag(e){
-e.dataTransfer.setData("text",e.target.id);
-}
-
-document.querySelectorAll(".basket").forEach(box=>{
-
-box.addEventListener("dragover",e=>e.preventDefault());
-
-box.addEventListener("drop",function(e){
-
-e.preventDefault();
-
-let id=e.dataTransfer.getData("text");
-let item=document.getElementById(id);
-
-if(this.id=="noun"){
-
-if(nouns.includes(id)){
-this.appendChild(item);
-message.innerHTML="🎉 Great! That's a noun!";
-message.style.color="green";
-}else{
-message.innerHTML="❌ Oops! That's not a noun.";
-message.style.color="red";
-}
-
-}else{
-
-if(!nouns.includes(id)){
-this.appendChild(item);
-message.innerHTML="👏 Correct!";
-message.style.color="green";
-}else{
-message.innerHTML="❌ That's actually a noun!";
-message.style.color="red";
-}
-
-}
-
-});
-
-});
-
-</script>
-
+        // Quick function to reset everything back to the starting word bank
+        function resetGame() {
+            const wordBank = document.getElementById('words-container');
+            const allWords = document.querySelectorAll('.draggable');
+            
+            allWords.forEach(word => {
+                word.style.backgroundColor = '#3498db';
+                wordBank.appendChild(word);
+            });
+        }
+    </script>
 </body>
 </html>
