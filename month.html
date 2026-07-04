@@ -1,137 +1,234 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Months Spelling Challenge</title>
-  <style>
-    body {
-      font-family: Arial;
-      background-color: #cfe8f7;
-      text-align: center;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noun Sorting Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
 
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      max-width: 450px;
-      margin: auto;
-    }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-    button {
-      display: block;
-      width: 100%;
-      margin: 8px 0;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #fff4b3;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+        p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* Container for words to be dragged */
+        #words-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            max-width: 800px;
+            justify-content: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            min-height: 50px;
+        }
+
+        .draggable {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: grab;
+            font-weight: bold;
+            user-select: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .draggable.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        /* Categories Grid */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        @media (min-width: 600px) {
+            .categories-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .category-box {
+            background: #fff;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .category-box.drag-over {
+            background-color: #e8f4f8;
+            border-color: #3498db;
+        }
+
+        .category-box h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #f1f3f5;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 8px;
+        }
+
+        /* Styling for words inside the categories */
+        .category-box .draggable {
+            margin-bottom: 8px;
+            width: 80%;
+            text-align: center;
+            background-color: #2ecc71; /* Changes to green when sorted */
+        }
+
+        #reset-btn {
+            margin-top: 25px;
+            padding: 12px 24px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        #reset-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
-
 <body>
 
-<h2>📅 Months Spelling Challenge</h2>
-<div id="score">Score: 0</div>
+    <h1>Noun Sorting Game</h1>
+    <p>Drag each noun below and drop it into its correct category!</p>
 
-<div class="box" id="quiz"></div>
-<div id="result"></div>
+    <div id="words-container">
+        <div class="draggable" draggable="true" data-category="person">Teacher</div>
+        <div class="draggable" draggable="true" data-category="place">Paris</div>
+        <div class="draggable" draggable="true" data-category="thing">Laptop</div>
+        <div class="draggable" draggable="true" data-category="animal">Lion</div>
+        <div class="draggable" draggable="true" data-category="person">Doctor</div>
+        <div class="draggable" draggable="true" data-category="place">Library</div>
+        <div class="draggable" draggable="true" data-category="thing">Guitar</div>
+        <div class="draggable" draggable="true" data-category="animal">Penguin</div>
+    </div>
 
-<script>
-let questions = [
-  {q: "Choose the correct spelling:", options: ["January", "Januarye", "Januery"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["February", "Febuary", "Febrary"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["March", "Marhc", "Marsh"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["April", "Aprill", "Aperil"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["May", "Mai", "Mey"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["June", "Jun", "Joon"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["July", "Jully", "Juley"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["August", "Agust", "Augest"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["September", "Septembar", "Septembr"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["October", "Octobar", "Octuber"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["November", "Novembar", "Novemver"], answer: 0},
-  {q: "Choose the correct spelling:", options: ["December", "Decembar", "Decemver"], answer: 0}
-];
+    <div class="categories-grid">
+        <div class="category-box" data-type="person">
+            <h2>Person</h2>
+        </div>
+        <div class="category-box" data-type="place">
+            <h2>Place</h2>
+        </div>
+        <div class="category-box" data-type="thing">
+            <h2>Thing</h2>
+        </div>
+        <div class="category-box" data-type="animal">
+            <h2>Animal</h2>
+        </div>
+    </div>
 
-let current = 0;
-let score = 0;
-let currentShuffledOptions = [];
-let correctTextForCurrentQuestion = "";
+    <button id="reset-btn" onclick="resetGame()">Reset Game</button>
 
-let clickSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-let correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg");
-let wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
+    <script>
+        const draggables = document.querySelectorAll('.draggable');
+        const containers = document.querySelectorAll('.category-box, #words-container');
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+        draggables.forEach(draggable => {
+            // Triggered when user starts dragging a word
+            draggable.addEventListener('dragstart', () => {
+                draggable.classList.add('dragging');
+            });
 
-function loadQuestion() {
-  if (current >= questions.length) {
-    document.getElementById("quiz").innerHTML = "";
-    document.getElementById("result").innerHTML =
-      "🎉 Finished! Final Score: " + score + " / " + questions.length;
-    return;
-  }
+            // Triggered when dragging finishes
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+            });
+        });
 
-  let q = questions[current];
-  correctTextForCurrentQuestion = q.options[q.answer];
-  currentShuffledOptions = shuffle([...q.options]);
+        containers.forEach(container => {
+            // Allows the drop to happen (default browser behavior blocks it)
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (container.classList.contains('category-box')) {
+                    container.classList.add('drag-over');
+                }
+            });
 
-  let html = `<p><b>${q.q}</b></p>`;
+            // Visual indicator when leaving a dropzone
+            container.addEventListener('dragleave', () => {
+                container.classList.remove('drag-over');
+            });
 
-  currentShuffledOptions.forEach((opt, index) => {
-    html += `<button onclick="check(${index})">${opt}</button>`;
-  });
+            // Handles the actual drop logic
+            container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                container.classList.remove('drag-over');
+                
+                const draggingElement = document.querySelector('.dragging');
+                const targetCategory = container.getAttribute('data-type');
+                const correctCategory = draggingElement.getAttribute('data-category');
 
-  document.getElementById("quiz").innerHTML = html;
-}
+                // Validation: Only append if dropping back in word-bank OR if it matches the correct category
+                if (!targetCategory || targetCategory === correctCategory) {
+                    container.appendChild(draggingElement);
+                    
+                    // Style change based on location
+                    if (!targetCategory) {
+                        draggingElement.style.backgroundColor = '#3498db'; // Back to blue in bank
+                    } else {
+                        draggingElement.style.backgroundColor = '#2ecc71'; // Green for correct drop
+                    }
+                } else {
+                    // Optional: Visual feedback for an incorrect match
+                    draggingElement.style.animation = "shake 0.5s";
+                    alert(`Oops! That's not the right category for "${draggingElement.innerText}".`);
+                }
+            });
+        });
 
-function check(selectedIndex) {
-  clickSound.play();
-
-  let selectedText = currentShuffledOptions[selectedIndex];
-  let buttons = document.querySelectorAll("#quiz button");
-
-  buttons.forEach((btn, idx) => {
-    btn.disabled = true;
-
-    if (currentShuffledOptions[idx] === correctTextForCurrentQuestion) {
-      btn.style.background = "#a8e6a3";
-    }
-
-    if (
-      idx === selectedIndex &&
-      selectedText !== correctTextForCurrentQuestion
-    ) {
-      btn.style.background = "#ffb3b3";
-    }
-  });
-
-  if (selectedText === correctTextForCurrentQuestion) {
-    score++;
-    correctSound.play();
-  } else {
-    wrongSound.play();
-  }
-
-  document.getElementById("score").innerText = "Score: " + score;
-
-  setTimeout(() => {
-    current++;
-    loadQuestion();
-  }, 1200);
-}
-
-loadQuestion();
-</script>
-
+        // Quick function to reset everything back to the starting word bank
+        function resetGame() {
+            const wordBank = document.getElementById('words-container');
+            const allWords = document.querySelectorAll('.draggable');
+            
+            allWords.forEach(word => {
+                word.style.backgroundColor = '#3498db';
+                wordBank.appendChild(word);
+            });
+        }
+    </script>
 </body>
 </html>
