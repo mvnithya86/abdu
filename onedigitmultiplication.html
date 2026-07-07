@@ -1,63 +1,134 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Decimal Math Game</title>
+  <meta charset="UTF-8">
+  <title>One-Digit Multiplication Game</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: 'Segoe UI', Arial, sans-serif;
       background-color: #cfe8f7;
       text-align: center;
       padding: 20px;
     }
 
+    h2 {
+      color: #1a4a6e;
+      margin-bottom: 10px;
+    }
+
+    #stats-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      max-width: 450px;
+      margin: 0 auto 15px auto;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
     .box {
       background: white;
-      padding: 20px;
+      padding: 25px;
       border-radius: 15px;
       max-width: 450px;
       margin: auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .q-text {
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #2c3e50;
     }
 
     button {
       display: block;
       width: 100%;
-      margin: 8px 0;
-      padding: 12px;
+      margin: 10px 0;
+      padding: 14px;
       border-radius: 10px;
-      border: none;
+      border: 2px solid #f3e5ab;
       background: #fff4b3;
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #5d4037;
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: #ffeaa7;
+      transform: translateY(-2px);
+    }
+
+    .star-display {
+      font-size: 22px;
+      color: #f1c40f;
+      margin-top: 15px;
+      word-wrap: break-word;
+    }
+
+    #result {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+      line-height: 1.6;
     }
   </style>
 </head>
 
 <body>
 
-<h2>🔢 Decimal Math Game</h2>
-<div id="score">Score: 0</div>
+<h2>🔢 One-Digit Multiplication Game</h2>
+
+<div id="stats-container">
+  <div id="score">Score: 0 / 30</div>
+  <div id="star-counter">Stars: 0 ⭐</div>
+</div>
 
 <div class="box" id="quiz"></div>
 <div id="result"></div>
 
-
 <script>
+// ---------- 30 One-Digit by One-Digit Multiplication Questions ----------
 let questions = [
-  /* ---------- 3-Digit by 2-Digit Whole Number Multiplication ---------- */
-  {q: "124 × 32 = ?", options: ["3,968", "3,848", "39,680"], answer: 0},
-  {q: "425 × 16 = ?", options: ["6,800", "4,250", "6,500"], answer: 0},
-  {q: "215 × 24 = ?", options: ["5,160", "5,040", "1,290"], answer: 0},
-  {q: "612 × 15 = ?", options: ["9,180", "6,120", "9,070"], answer: 0},
-  {q: "334 × 22 = ?", options: ["7,348", "7,248", "73,480"], answer: 0},
-  {q: "250 × 48 = ?", options: ["12,000", "10,000", "12,500"], answer: 0},
-  {q: "152 × 35 = ?", options: ["5,320", "4,560", "5,220"], answer: 0},
-  {q: "208 × 45 = ?", options: ["9,360", "8,320", "9,100"], answer: 0},
-  {q: "741 × 12 = ?", options: ["8,892", "7,410", "8,792"], answer: 0},
-  {q: "315 × 26 = ?", options: ["8,190", "7,950", "8,050"], answer: 0}
+  {q: "3 × 4 = ?", options: ["12", "14", "9"], answer: 0},
+  {q: "5 × 6 = ?", options: ["30", "25", "36"], answer: 0},
+  {q: "7 × 3 = ?", options: ["21", "24", "18"], answer: 0},
+  {q: "2 × 8 = ?", options: ["16", "14", "18"], answer: 0},
+  {q: "4 × 9 = ?", options: ["36", "32", "40"], answer: 0},
+  {q: "6 × 7 = ?", options: ["42", "48", "36"], answer: 0},
+  {q: "8 × 5 = ?", options: ["40", "45", "35"], answer: 0},
+  {q: "9 × 3 = ?", options: ["27", "24", "30"], answer: 0},
+  {q: "4 × 4 = ?", options: ["16", "12", "20"], answer: 0},
+  {q: "7 × 7 = ?", options: ["49", "56", "42"], answer: 0},
+  {q: "3 × 6 = ?", options: ["18", "15", "21"], answer: 0},
+  {q: "5 × 9 = ?", options: ["45", "40", "50"], answer: 0},
+  {q: "8 × 8 = ?", options: ["64", "56", "72"], answer: 0},
+  {q: "6 × 4 = ?", options: ["24", "20", "28"], answer: 0},
+  {q: "2 × 7 = ?", options: ["14", "12", "16"], answer: 0},
+  {q: "9 × 9 = ?", options: ["81", "72", "90"], answer: 0},
+  {q: "3 × 8 = ?", options: ["24", "28", "21"], answer: 0},
+  {q: "5 × 5 = ?", options: ["25", "20", "30"], answer: 0},
+  {q: "7 × 8 = ?", options: ["56", "64", "54"], answer: 0},
+  {q: "4 × 7 = ?", options: ["28", "24", "32"], answer: 0},
+  {q: "6 × 6 = ?", options: ["36", "30", "42"], answer: 0},
+  {q: "8 × 9 = ?", options: ["72", "81", "63"], answer: 0},
+  {q: "2 × 9 = ?", options: ["18", "16", "20"], answer: 0},
+  {q: "7 × 5 = ?", options: ["35", "40", "30"], answer: 0},
+  {q: "3 × 3 = ?", options: ["9", "6", "12"], answer: 0},
+  {q: "6 × 8 = ?", options: ["48", "54", "44"], answer: 0},
+  {q: "4 × 8 = ?", options: ["32", "36", "28"], answer: 0},
+  {q: "9 × 6 = ?", options: ["54", "63", "48"], answer: 0},
+  {q: "5 × 4 = ?", options: ["20", "15", "25"], answer: 0},
+  {q: "8 × 2 = ?", options: ["16", "10", "14"], answer: 0}
 ];
 
 let current = 0;
 let score = 0;
+let starsCollected = 0;
 let currentShuffledOptions = [];
 let correctTextForCurrentQuestion = "";
 
@@ -77,8 +148,22 @@ function shuffle(array) {
 function loadQuestion() {
   if (current >= questions.length) {
     document.getElementById("quiz").innerHTML = "";
-    document.getElementById("result").innerHTML =
-      "🎉 Finished! Final Score: " + score + " / " + questions.length;
+    
+    // Generate star icons string matching the total stars collected
+    let starsString = "";
+    for(let i = 0; i < starsCollected; i++) {
+      starsString += "⭐ ";
+    }
+    if (starsCollected === 0) starsString = "None this time. Keep practicing!";
+
+    document.getElementById("quiz").innerHTML = `
+      <div id="result">
+        <h2>🎉 Finished!</h2>
+        <p>Final Score: <b>${score} / ${questions.length}</b></p>
+        <p>Total Stars Collected: <b>${starsCollected} / ${questions.length}</b></p>
+        <div class="star-display">${starsString}</div>
+      </div>
+    `;
     return;
   }
 
@@ -86,9 +171,8 @@ function loadQuestion() {
   correctTextForCurrentQuestion = q.options[q.answer];
   currentShuffledOptions = shuffle([...q.options]);
 
-  let html = `<p><b>${q.q}</b></p>`;
+  let html = `<p class="q-text"><b>Question ${current + 1}: ${q.q}</b></p>`;
   
-  // Safely passing the array index to avoid character breaking
   currentShuffledOptions.forEach((opt, index) => {
     html += `<button onclick="check(${index})">${opt}</button>`;
   });
@@ -108,20 +192,24 @@ function check(selectedIndex) {
 
     if (btnText === correctTextForCurrentQuestion) {
       btn.style.background = "#a8e6a3"; 
+      btn.style.borderColor = "#78e08f";
     }
     if (idx === selectedIndex && selectedText !== correctTextForCurrentQuestion) {
       btn.style.background = "#ffb3b3"; 
+      btn.style.borderColor = "#ff4d4d";
     }
   });
 
   if (selectedText === correctTextForCurrentQuestion) {
     score++;
+    starsCollected++;
     correctSound.play();
   } else {
     wrongSound.play();
   }
 
-  document.getElementById("score").innerText = "Score: " + score;
+  document.getElementById("score").innerText = "Score: " + score + " / 30";
+  document.getElementById("star-counter").innerText = "Stars: " + starsCollected + " ⭐";
 
   setTimeout(() => {
     current++;
@@ -129,9 +217,9 @@ function check(selectedIndex) {
   }, 1200);
 }
 
+// Start game
 loadQuestion();
 </script>
-
 
 </body>
 </html>
