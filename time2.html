@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Time Worksheets</title>
+    <style>
+        :root {
+            --primary-color: #d11a5b;
+            --secondary-color: #2b7a78;
+            --bg-color: #f0f7f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            border-bottom: 2px solid #e0f0f0;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* --- Clock Widget Styles --- */
+        .clock-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .target-time {
+            font-size: 24px;
+            font-weight: bold;
+            background: #e8f4f4;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            border: 2px dashed var(--secondary-color);
+        }
+
+        .clock-face {
+            width: 200px;
+            height: 200px;
+            border: 8px solid #333;
+            border-radius: 50%;
+            position: relative;
+            background: white;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+            touch-action: none; /* Prevents scrolling when dragging on mobile */
+        }
+
+        .clock-center {
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .hour-hand {
+            width: 6px;
+            height: 55px;
+            background: #333;
+            position: absolute;
+            bottom: 50%;
+            left: calc(50% - 3px);
+            transform-origin: bottom center;
+            border-radius: 4px;
+            transform: rotate(90deg); /* Fixed position for 3 o'clock base */
+        }
+
+        .minute-hand {
+            width: 4px;
+            height: 80px;
+            background: var(--primary-color);
+            position: absolute;
+            bottom: 50%;
+            left: calc(50% - 2px);
+            transform-origin: bottom center;
+            border-radius: 2px;
+            transform: rotate(0deg);
+            z-index: 5;
+        }
+
+        .clock-number {
+            position: absolute;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* --- MCQ Quiz Styles --- */
+        .question-block {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .question-text {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option-btn.selected {
+            background: #e0f2fe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        /* --- Control Buttons & Feedback --- */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .feedback.success {
+            background-color: #dcfce7;
+            color: #166534;
+            display: block;
+        }
+
+        .feedback.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Time Workspace Interactive</h1>
+    <div class="subtitle">"Preparing not just for school, but for life."</div>
+
+    <!-- SECTION 1: ROTATING CLOCK HANDLE TASK -->
+    <div class="container">
+        <h2>Task 1: Draw the Minute Hand</h2>
+        <div class="clock-wrapper">
+            <div class="target-time">Target Time: 3:30</div>
+            <p style="margin: 0 0 15px 0; text-align: center;">Click and drag or touch-rotate the <b>red minute hand</b> to set it to 30 minutes!</p>
+            
+            <div class="clock-face" id="interactive-clock">
+                <div class="clock-center"></div>
+                <!-- Hour hand static near 3 (adjusted slightly forward for 3:30 realism) -->
+                <div class="hour-hand" style="transform: rotate(105deg);"></div>
+                <!-- Interactive Minute hand -->
+                <div class="minute-hand" id="minute-hand"></div>
+                
+                <!-- Clock Numbers Placement -->
+                <div class="clock-number" style="top: 5px; left: 93px;">12</div>
+                <div class="clock-number" style="top: 22px; left: 140px;">1</div>
+                <div class="clock-number" style="top: 57px; left: 173px;">2</div>
+                <div class="clock-number" style="top: 90px; left: 185px;">3</div>
+                <div class="clock-number" style="top: 125px; left: 173px;">4</div>
+                <div class="clock-number" style="top: 160px; left: 140px;">5</div>
+                <div class="clock-number" style="bottom: 5px; left: 96px;">6</div>
+                <div class="clock-number" style="top: 160px; left: 50px;">7</div>
+                <div class="clock-number" style="top: 125px; left: 18px;">8</div>
+                <div class="clock-number" style="top: 90px; left: 8px;">9</div>
+                <div class="clock-number" style="top: 57px; left: 18px;">10</div>
+                <div class="clock-number" style="top: 22px; left: 45px;">11</div>
+            </div>
+            
+            <button class="btn-submit" onclick="checkClockAnswer()">Check Handle Position</button>
+            <div id="clock-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: MULTIPLE CHOICE QUESTIONS -->
+    <div class="container">
+        <h2>Task 2: Multiple Choice Concept Check</h2>
+        
+        <!-- Question 1 -->
+        <div class="question-block" id="q1">
+            <div class="question-text">1. Sarah does her homework every afternoon at 4:00. Which marker applies?</div>
+            <div class="options-grid">
+                <div class="option-btn" onclick="selectOption('q1', 'AM')">4:00 AM</div>
+                <div class="option-btn" onclick="selectOption('q1', 'PM')">4:00 PM</div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-block" id="q2">
+            <div class="question-text">2. If a clock face shows a "Quarter Past 6", what is the exact digital minute reading?</div>
+            <div class="options-grid">
+                <div class="option-btn" onclick="selectOption('q2', '15')">6:15</div>
+                <div class="option-btn" onclick="selectOption('q2', '30')">6:30</div>
+                <div class="option-btn" onclick="selectOption('q2', '45')">6:45</div>
+                <div class="option-btn" onclick="selectOption('q2', '00')">6:00</div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-block" id="q3">
+            <div class="question-text">3. When the minute hand points directly at the 6, how many minutes have passed in the hour?</div>
+            <div class="options-grid">
+                <div class="option-btn" onclick="selectOption('q3', '15')">15 Minutes</div>
+                <div class="option-btn" onclick="selectOption('q3', '30')">30 Minutes (Half Hour)</div>
+                <div class="option-btn" onclick="selectOption('q3', '45')">45 Minutes</div>
+                <div class="option-btn" onclick="selectOption('q3', '60')">60 Minutes</div>
+            </div>
+        </div>
+
+        <button class="btn-submit" onclick="checkQuizAnswers()">Submit Quiz Answers</button>
+        <div id="quiz-feedback" class="feedback"></div>
+    </div>
+
+    <script>
+        // --- Clock Handle Drag Logic ---
+        const clockFace = document.getElementById('interactive-clock');
+        const minuteHand = document.getElementById('minute-hand');
+        let currentRotation = 0;
+        let isDragging = false;
+
+        function handleRotate(e) {
+            const rect = clockFace.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Handle both touch and mouse events coordinates
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - centerX;
+            const deltaY = clientY - centerY;
+            
+            // Calculate angle in degrees
+            let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+            
+            // Adjust to coordinate system where 0 degrees is straight UP (12 o'clock)
+            angle = angle + 90;
+            if (angle < 0) angle += 360;
+
+            // Snap handle to nearest 5-minute ticks (30 degrees per hour, 6 degrees per minute)
+            const snappedAngle = Math.round(angle / 30) * 30;
+            currentRotation = snappedAngle % 360;
+            
+            minuteHand.style.transform = `rotate(${currentRotation}deg)`;
+        }
+
+        // Mouse Events
+        clockFace.addEventListener('mousedown', (e) => { isDragging = true; handleRotate(e); });
+        document.addEventListener('mousemove', (e) => { if (isDragging) handleRotate(e); });
+        document.addEventListener('mouseup', () => isDragging = false);
+
+        // Touch Events (Mobile/Tablet Support)
+        clockFace.addEventListener('touchstart', (e) => { isDragging = true; handleRotate(e); });
+        document.addEventListener('touchmove', (e) => { if (isDragging) handleRotate(e); });
+        document.addEventListener('touchend', () => isDragging = false);
+
+        // Validation for target time 3:30 (Minute hand should point straight down at 6 -> 180 degrees)
+        function checkClockAnswer() {
+            const feedback = document.getElementById('clock-feedback');
+            if (currentRotation === 180) {
+                feedback.textContent = "Correct! The minute hand points perfectly at 6 for 30 minutes.";
+                feedback.className = "feedback success";
+            } else {
+                feedback.textContent = "Not quite! Remember, for :30 (half past), the minute hand should point directly at the number 6.";
+                feedback.className = "feedback error";
+            }
+        }
+
+        // --- MCQ State & Validation Logic ---
+        const userSelections = { q1: null, q2: null, q3: null };
+        const correctAnswers = { q1: 'PM', q2: '15', q3: '30' };
+
+        function selectOption(questionId, value) {
+            const block = document.getElementById(questionId);
+            const buttons = block.querySelectorAll('.option-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Highlight chosen button
+            event.target.classList.add('selected');
+            userSelections[questionId] = value;
+        }
+
+        function checkQuizAnswers() {
+            const feedback = document.getElementById('quiz-feedback');
+            
+            // Verify if all questions are answered
+            if (!userSelections.q1 || !userSelections.q2 || !userSelections.q3) {
+                feedback.textContent = "Please answer all multiple-choice questions first!";
+                feedback.className = "feedback error";
+                return;
+            }
+
+            let score = 0;
+            if (userSelections.q1 === correctAnswers.q1) score++;
+            if (userSelections.q2 === correctAnswers.q2) score++;
+            if (userSelections.q3 === correctAnswers.q3) score++;
+
+            if (score === 3) {
+                feedback.textContent = "Amazing job! You scored 3/3 correct answers!";
+                feedback.className = "feedback success";
+            } else {
+                feedback.textContent = `You got ${score} out of 3 correct. Review your answers and try again!`;
+                feedback.className = "feedback error";
+            }
+        }
+    </script>
+</body>
+</html>
