@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Time Workbook - Half-Hour Intervals</title>
+    <style>
+        :root {
+            --primary-color: #d11a5b;
+            --secondary-color: #2b7a78;
+            --bg-color: #f0f7f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin: 0 0 5px 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .workbook-container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background-color: #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 4%;
+            background: linear-gradient(90deg, var(--primary-color), #f43f5e);
+            transition: width 0.3s ease;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .question-box {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            background: #e8f4f4;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px dashed var(--secondary-color);
+        }
+
+        /* --- Interactive Clock Workspace --- */
+        .clock-outer-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        .clock-face {
+            width: 240px;
+            height: 240px;
+            border: 10px solid #333;
+            border-radius: 50%;
+            position: relative;
+            background: white;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.1);
+            touch-action: none;
+        }
+
+        .clock-center {
+            width: 16px;
+            height: 16px;
+            background: #222;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        /* Interactive Minute Hand */
+        .minute-hand {
+            width: 5px;
+            height: 95px;
+            background: #333;
+            position: absolute;
+            bottom: 50%;
+            left: calc(50% - 2.5px);
+            transform-origin: bottom center;
+            border-radius: 4px;
+            transform: rotate(0deg);
+            z-index: 4;
+            cursor: pointer;
+        }
+
+        /* Interactive Hour Hand */
+        .hour-hand {
+            width: 8px;
+            height: 65px;
+            background: var(--primary-color);
+            position: absolute;
+            bottom: 50%;
+            left: calc(50% - 4px);
+            transform-origin: bottom center;
+            border-radius: 5px;
+            transform: rotate(0deg); 
+            z-index: 6;
+            cursor: pointer;
+        }
+
+        .clock-number {
+            position: absolute;
+            font-weight: 800;
+            font-size: 18px;
+            color: #333;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        /* --- Controls --- */
+        .btn-action {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-action:hover {
+            opacity: 0.95;
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        .feedback-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            min-height: 22px;
+            visibility: hidden;
+        }
+
+        .feedback-message.show {
+            visibility: visible;
+        }
+
+        .success-banner {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .error-banner {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* --- Reward Screen Overlay --- */
+        .reward-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .reward-badge {
+            font-size: 80px;
+            animation: bounce 1s infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        .reward-title {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Time Workspace Interactive</h1>
+    <div class="subtitle">Drag BOTH hands to match the half-hour times!</div>
+
+    <div class="workbook-container">
+        <!-- Progress System -->
+        <div class="progress-bar-container">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+        <div class="stats-header">
+            <span id="question-number-label">Question 1 of 25</span>
+            <span id="score-label">Stars: ⭐ 0</span>
+        </div>
+
+        <!-- Target Question Area -->
+        <div class="question-box" id="target-instruction">
+            Set the clock to: 12:30
+        </div>
+
+        <p style="margin:0; font-size:14px; color:#555;">Drag the <b>red hand</b> for hours and the <b>black hand</b> for minutes.</p>
+
+        <!-- Clock Face Container -->
+        <div class="clock-outer-wrapper">
+            <div class="clock-face" id="interactive-clock">
+                <div class="clock-center"></div>
+                <div class="minute-hand" id="minute-hand"></div>
+                <div class="hour-hand" id="hour-hand"></div>
+                
+                <!-- Numbers -->
+                <div class="clock-number" style="top: 5px; left: 105px;">12</div>
+                <div class="clock-number" style="top: 22px; left: 157px;">1</div>
+                <div class="clock-number" style="top: 65px; left: 195px;">2</div>
+                <div class="clock-number" style="top: 105px; left: 205px;">3</div>
+                <div class="clock-number" style="top: 147px; left: 195px;">4</div>
+                <div class="clock-number" style="top: 188px; left: 157px;">5</div>
+                <div class="clock-number" style="bottom: 5px; left: 105px;">6</div>
+                <div class="clock-number" style="top: 188px; left: 53px;">7</div>
+                <div class="clock-number" style="top: 147px; left: 15px;">8</div>
+                <div class="clock-number" style="top: 105px; left: 5px;">9</div>
+                <div class="clock-number" style="top: 65px; left: 15px;">10</div>
+                <div class="clock-number" style="top: 22px; left: 53px;">11</div>
+            </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="controls">
+            <button class="btn-action" id="action-btn" onclick="handleSubmit()">Verify Position</button>
+        </div>
+
+        <!-- Dynamic Feedback Messages -->
+        <div id="feedback-alert" class="feedback-message"></div>
+
+        <!-- Completion Reward Screen Overlay -->
+        <div class="reward-screen" id="reward-screen">
+            <div class="reward-badge">🏆</div>
+            <div class="reward-title">Superb Achievement!</div>
+            <p style="font-size: 16px; padding: 0 20px; color:#444;">You mastered all 25 half-hour workspace challenges with perfect hand accuracy!</p>
+            <button class="btn-action" style="width:80%; margin-top:15px;" onclick="resetWorkbook()">Restart Workbook</button>
+        </div>
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        // 25 dynamically varied half-hour target settings
+        const targetTimes = [
+            "12:30", "5:30", "9:30", "2:30", "7:30", "11:30", "4:30", "1:30", "8:30", "6:30", 
+            "10:30", "3:30", "5:30", "12:30", "9:30", "1:30", "7:30", "4:30", "11:30", "2:30", 
+            "8:30", "3:30", "6:30", "10:30", "12:30"
+        ];
+
+        let currentIndex = 0;
+        let currentStars = 0;
+        
+        // Internal angle trackers
+        let currentHourAngle = 0;
+        let currentMinAngle = 0;
+        
+        let activeHand = null;
+        let isWaitingNext = false;
+
+        const hourHandElement = document.getElementById('hour-hand');
+        const minuteHandElement = document.getElementById('minute-hand');
+        const clockFaceElement = document.getElementById('interactive-clock');
+        const instructionText = document.getElementById('target-instruction');
+        const progressFill = document.getElementById('progress-fill');
+        const qNumberLabel = document.getElementById('question-number-label');
+        const scoreLabel = document.getElementById('score-label');
+        const feedbackAlert = document.getElementById('feedback-alert');
+        const actionButton = document.getElementById('action-btn');
+        const rewardScreen = document.getElementById('reward-screen');
+        const confettiCanvas = document.getElementById('confetti-canvas');
+
+        updateUI();
+
+        function getClosestHand(e) {
+            const rect = clockFaceElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const dX = clientX - centerX;
+            const dY = clientY - centerY;
+            const distanceFromCenter = Math.sqrt(dX * dX + dY * dY);
+
+            return (distanceFromCenter > 75) ? 'minute' : 'hour';
+        }
+
+        function handleMove(e) {
+            if (!activeHand) return;
+
+            const rect = clockFaceElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const dX = clientX - centerX;
+            const dY = clientY - centerY;
+            
+            let angleDegrees = Math.atan2(dY, dX) * (180 / Math.PI) + 90;
+            if (angleDegrees < 0) angleDegrees += 360;
+
+            if (activeHand === 'hour') {
+                // Hour hand snaps into half-hour steps (15-degree steps instead of 30)
+                let snappedAngle = Math.round(angleDegrees / 15) * 15;
+                currentHourAngle = snappedAngle % 360;
+                hourHandElement.style.transform = `rotate(${currentHourAngle}deg)`;
+            } else if (activeHand === 'minute') {
+                // Minute hand snaps smoothly to 5-minute ticks (30-degree blocks)
+                let snappedAngle = Math.round(angleDegrees / 30) * 30;
+                currentMinAngle = snappedAngle % 360;
+                minuteHandElement.style.transform = `rotate(${currentMinAngle}deg)`;
+            }
+        }
+
+        clockFaceElement.addEventListener('mousedown', (e) => { 
+            if(isWaitingNext) return; 
+            activeHand = getClosestHand(e); 
+            handleMove(e); 
+        });
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', () => activeHand = null);
+
+        clockFaceElement.addEventListener('touchstart', (e) => { 
+            if(isWaitingNext) return; 
+            activeHand = getClosestHand(e); 
+            handleMove(e); 
+        });
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('touchend', () => activeHand = null);
+
+        function updateUI() {
+            instructionText.textContent = `Set the clock to: ${targetTimes[currentIndex]}`;
+            qNumberLabel.textContent = `Question ${currentIndex + 1} of 25`;
+            scoreLabel.textContent = `Stars: ⭐ ${currentStars}`;
+            progressFill.style.width = `${((currentIndex + 1) / 25) * 100}%`;
+            
+            // Randomly scatter positions at initialization so students must interact
+            currentHourAngle = 0; // Starts at 12
+            currentMinAngle = 0;  // Starts at 12
+            
+            hourHandElement.style.transform = `rotate(${currentHourAngle}deg)`;
+            minuteHandElement.style.transform = `rotate(${currentMinAngle}deg)`;
+            
+            feedbackAlert.className = "feedback-message";
+            actionButton.textContent = "Verify Position";
+            isWaitingNext = false;
+        }
+
+        function handleSubmit() {
+            if (isWaitingNext) {
+                currentIndex++;
+                if (currentIndex >= 25) {
+                    triggerRewardCelebration();
+                } else {
+                    updateUI();
+                }
+                return;
+            }
+
+            // Target calculations
+            const timeString = targetTimes[currentIndex];
+            const hourPart = parseInt(timeString.split(":")[0]);
+            
+            // Expected minute hand is always 30 minutes -> 180 degrees (pointing straight down at 6)
+            const expectedMinAngle = 180;
+            
+            // Expected hour angle includes a 15-degree offset because it is exactly halfway past the hour
+            let baseHourAngle = (hourPart % 12) * 30;
+            const expectedHourAngle = (baseHourAngle + 15) % 360;
+
+            if (currentMinAngle === expectedMinAngle && currentHourAngle === expectedHourAngle) {
+                currentStars++;
+                feedbackAlert.textContent = "Fantastic! The minute hand is at 6 and the hour hand is exactly halfway in between!";
+                feedbackAlert.className = "feedback-message show success-banner";
+                actionButton.textContent = "Next Question →";
+                isWaitingNext = true;
+            } else {
+                if (currentMinAngle !== expectedMinAngle) {
+                    feedbackAlert.textContent = "Look closely at the minutes! For a half-hour (:30), the long black hand needs to point straight down at the 6.";
+                } else {
+                    feedbackAlert.textContent = `Check your red hour hand. Since it's ${timeString}, it must be resting exactly halfway between ${hourPart} and the next number.`;
+                }
+                feedbackAlert.className = "feedback-message show error-banner";
+            }
+        }
+
+        // --- Celebration Effects ---
+        let animationFrameId;
+        function triggerRewardCelebration() {
+            rewardScreen.style.display = 'flex';
+            confettiCanvas.style.display = 'block';
+            
+            const ctx = confettiCanvas.getContext('2d');
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+            
+            let particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * confettiCanvas.height,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            function drawParticles() {
+                ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                particles.forEach((p, index) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                    p.x += Math.sin(p.tiltAngle);
+                    p.tilt = Math.sin(p.tiltAngle - index / 3) * 15;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+
+                    if (p.y > confettiCanvas.height) {
+                        particles[index] = p;
+                        p.x = Math.random() * confettiCanvas.width;
+                        p.y = -20;
+                    }
+                });
+                animationFrameId = requestAnimationFrame(drawParticles);
+            }
+            drawParticles();
+        }
+
+        function resetWorkbook() {
+            cancelAnimationFrame(animationFrameId);
+            currentIndex = 0;
+            currentStars = 0;
+            rewardScreen.style.display = 'none';
+            confettiCanvas.style.display = 'none';
+            updateUI();
+        }
+    </script>
+</body>
+</html>
