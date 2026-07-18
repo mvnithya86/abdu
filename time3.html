@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telling Time MCQ Challenge</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #cfe8f7; text-align: center; padding: 20px; }
+    .box { background: white; padding: 20px; border-radius: 15px; max-width: 450px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .clue-text { font-size: 18px; color: #555; margin-bottom: 5px; }
+    .target-word { font-size: 22px; font-weight: bold; color: #27ae60; background: #e8f8f0; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+    canvas { background: white; margin: 10px auto; display: block; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    button { display: block; width: 100%; margin: 8px 0; padding: 12px; border-radius: 10px; border: none; background: #fff4b3; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    button:hover:not(:disabled) { background: #ffe885; }
+    #score { font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    #result { font-size: 24px; font-weight: bold; color: #27ae60; margin-top: 20px; }
+    .star { color: #f1c40f; font-size: 24px; animation: bounce 0.4s ease; }
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+<h2>📅 Clock MCQ Challenge</h2>
+<div id="score">⭐ Stars: 0 | Progress: 0 / 30</div>
+<div class="box" id="quiz"></div>
+<div id="result"></div>
+
+<script>
+let questions = [
+  {q: "What time is shown on the clock?", hour: 3, minute: 0, options: ["3 o'clock", "Quarter past 3", "Half past 3", "4 o'clock"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 5, minute: 30, options: ["Half past 5", "5 o'clock", "Quarter past 5", "Half past 6"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 10, minute: 15, options: ["Quarter past 10", "10 o'clock", "Half past 10", "Quarter past 11"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 1, minute: 0, options: ["1 o'clock", "12 o'clock", "Half past 1", "Quarter past 1"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 8, minute: 30, options: ["Half past 8", "Half past 7", "8 o'clock", "Quarter past 8"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 4, minute: 15, options: ["Quarter past 4", "4 o'clock", "Half past 4", "Quarter past 5"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 7, minute: 0, options: ["7 o'clock", "6 o'clock", "Half past 7", "Quarter past 7"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 12, minute: 30, options: ["Half past 12", "12 o'clock", "Half past 1", "Quarter past 12"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 2, minute: 15, options: ["Quarter past 2", "2 o'clock", "Half past 2", "Quarter past 3"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 11, minute: 0, options: ["11 o'clock", "10 o'clock", "Quarter past 11", "Half past 11"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 9, minute: 30, options: ["Half past 9", "9 o'clock", "Quarter past 9", "Half past 10"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 6, minute: 15, options: ["Quarter past 6", "6 o'clock", "Half past 6", "Quarter past 7"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 2, minute: 0, options: ["2 o'clock", "1 o'clock", "Half past 2", "Quarter past 2"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 4, minute: 30, options: ["Half past 4", "4 o'clock", "Quarter past 4", "Half past 5"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 1, minute: 15, options: ["Quarter past 1", "1 o'clock", "Half past 1", "Quarter past 2"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 6, minute: 0, options: ["6 o'clock", "5 o'clock", "Half past 6", "Quarter past 6"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 11, minute: 30, options: ["Half past 11", "Half past 10", "11 o'clock", "Quarter past 11"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 7, minute: 15, options: ["Quarter past 7", "7 o'clock", "Half past 7", "Quarter past 8"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 9, minute: 0, options: ["9 o'clock", "8 o'clock", "Half past 9", "Quarter past 9"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 3, minute: 30, options: ["Half past 3", "3 o'clock", "Quarter past 3", "Half past 4"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 5, minute: 15, options: ["Quarter past 5", "5 o'clock", "Half past 5", "Quarter past 6"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 10, minute: 0, options: ["10 o'clock", "9 o'clock", "Half past 10", "Quarter past 10"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 1, minute: 30, options: ["Half past 1", "Half past 12", "1 o'clock", "Quarter past 1"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 8, minute: 15, options: ["Quarter past 8", "8 o'clock", "Half past 8", "Quarter past 9"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 12, minute: 0, options: ["12 o'clock", "11 o'clock", "Half past 12", "Quarter past 12"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 10, minute: 30, options: ["Half past 10", "10 o'clock", "Quarter past 10", "Half past 11"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 12, minute: 15, options: ["Quarter past 12", "12 o'clock", "Half past 12", "Quarter past 1"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 5, minute: 0, options: ["5 o'clock", "4 o'clock", "Half past 5", "Quarter past 5"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 2, minute: 30, options: ["Half past 2", "2 o'clock", "Quarter past 2", "Half past 3"], answer: 0},
+  {q: "What time is shown on the clock?", hour: 9, minute: 15, options: ["Quarter past 9", "9 o'clock", "Half past 9", "Quarter past 10"], answer: 0}
+];
+
+let current = 0, score = 0, currentShuffledOptions = [], correctTextForCurrentQuestion = "";
+let clickSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+let correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg");
+let wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function drawClock(hour, minute) {
+  const canvas = document.getElementById('clockCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const radius = canvas.height / 2;
+  
+  ctx.save();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.translate(radius, radius);
+  
+  // Outer Dial Ring
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.9, 0, 2 * Math.PI);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.strokeStyle = '#2c3e50';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Core Pin center point
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.05, 0, 2 * Math.PI);
+  ctx.fillStyle = '#2c3e50';
+  ctx.fill();
+
+  // Face values numbering loop
+  ctx.font = "bold " + radius * 0.16 + "px Arial";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.fillStyle = '#2c3e50';
+  for (let num = 1; num <= 12; num++) {
+    let ang = num * Math.PI / 6;
+    ctx.rotate(ang);
+    ctx.translate(0, -radius * 0.72);
+    ctx.rotate(-ang);
+    ctx.fillText(num.toString(), 0, 0);
+    ctx.rotate(ang);
+    ctx.translate(0, radius * 0.72);
+    ctx.rotate(-ang);
+  }
+
+  // Positional configuration math
+  let hrHandPos = (hour % 12) * Math.PI / 6 + (minute * Math.PI / (6 * 60));
+  let minHandPos = minute * Math.PI / 30;
+
+  // Render Hour Element (Thicker, compact)
+  ctx.beginPath();
+  ctx.lineWidth = 5;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = '#2c3e50';
+  ctx.moveTo(0, 0);
+  ctx.rotate(hrHandPos);
+  ctx.lineTo(0, -radius * 0.5);
+  ctx.stroke();
+  ctx.rotate(-hrHandPos);
+
+  // Render Minute Element (Leaner, longer)
+  ctx.beginPath();
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = '#e74c3c';
+  ctx.moveTo(0, 0);
+  ctx.rotate(minHandPos);
+  ctx.lineTo(0, -radius * 0.75);
+  ctx.stroke();
+  ctx.rotate(-minHandPos);
+  
+  ctx.restore();
+}
+
+function loadQuestion() {
+  if (current >= questions.length) {
+    document.getElementById("quiz").innerHTML = "";
+    
+    let starsDisplay = "";
+    for(let i = 0; i < score; i++) {
+      starsDisplay += "⭐ ";
+    }
+    
+    document.getElementById("result").innerHTML = `
+      🎉 Finished!<br>
+      Total Stars Earned: ${score} / ${questions.length}<br>
+      <div style="margin-top:15px; font-size:24px; line-break: anywhere;">${starsDisplay || "No stars this time!"}</div>
+    `;
+    return;
+  }
+  let q = questions[current];
+  correctTextForCurrentQuestion = q.options[q.answer];
+  currentShuffledOptions = shuffle([...q.options]);
+
+  let html = `
+    <div class="clue-text">Question:</div>
+    <div class="target-word">${q.q}</div>
+    <canvas id="clockCanvas" width="200" height="200"></canvas>
+  `;
+  
+  currentShuffledOptions.forEach((opt, index) => { 
+    html += `<button onclick="check(${index})">${opt}</button>`; 
+  });
+  
+  document.getElementById("quiz").innerHTML = html;
+  drawClock(q.hour, q.minute);
+}
+
+function check(selectedIndex) {
+  clickSound.play().catch(e => {});
+  let selectedText = currentShuffledOptions[selectedIndex];
+  let buttons = document.querySelectorAll("#quiz button");
+
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (currentShuffledOptions[idx] === correctTextForCurrentQuestion) btn.style.background = "#a8e6a3";
+    if (idx === selectedIndex && selectedText !== correctTextForCurrentQuestion) btn.style.background = "#ffb3b3";
+  });
+
+  if (selectedText === correctTextForCurrentQuestion) { 
+    score++; 
+    correctSound.play().catch(e => {}); 
+  } else { 
+    wrongSound.play().catch(e => {}); 
+  }
+
+  document.getElementById("score").innerHTML = `<span class="star">⭐</span> Stars: ${score} | Progress: ${current + 1} / ${questions.length}`;
+  setTimeout(() => { current++; loadQuestion(); }, 1500);
+}
+loadQuestion();
+</script>
+</body>
+</html>
