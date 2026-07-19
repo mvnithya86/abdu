@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz 1: Numbers & Sequences</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f8ff; color: #333; margin: 0; padding: 20px; }
+        .quiz-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2a75d3; }
+        .question { margin-bottom: 25px; border-bottom: 1px dashed #ddd; padding-bottom: 15px; }
+        .question p { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .option { background: #eef5fc; padding: 10px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; text-align: center; font-weight: bold; }
+        .option:hover { background: #d7e9fa; }
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + label { background: #2a75d3; color: white; border-color: #1a5bb5; }
+        button { display: block; width: 100%; padding: 15px; background: #2a75d3; color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #1a5bb5; }
+        #result { display: none; text-align: center; margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; }
+        .stars { color: #ffca28; font-size: 2rem; letter-spacing: 3px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Math Quiz 1: Numbers & Sequences</h1>
+    <form id="quizForm">
+        <div id="quiz-questions"></div>
+        <button type="button" onclick="calculateScore()">Submit Quiz</button>
+    </form>
+
+    <div id="result">
+        <h2>Quiz Completed!</h2>
+        <div class="stars" id="starContainer"></div>
+        <p id="scoreText" style="font-size: 1.3rem; font-weight: bold;"></p>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "What number comes before 20?", o: ["18", "19", "21", "22"], a: "19" },
+        { q: "What number comes after 20?", o: ["19", "21", "22", "20"], a: "21" },
+        { q: "What number is in between 18 and 20?", o: ["17", "19", "21", "22"], a: "19" },
+        { q: "What number is in between 30 and 32?", o: ["29", "31", "33", "30"], a: "31" },
+        { q: "What number is in between 17 and 19?", o: ["16", "18", "20", "21"], a: "18" },
+        { q: "What number is in between 29 and 31?", o: ["28", "30", "32", "33"], a: "30" },
+        { q: "What number is in between 19 and 21?", o: ["18", "20", "22", "23"], a: "20" },
+        { q: "What number is in between 45 and 47?", o: ["44", "46", "48", "49"], a: "46" },
+        { q: "What number is in between 48 and 50?", o: ["47", "49", "51", "46"], a: "49" },
+        { q: "What number comes before 31?", o: ["30", "32", "29", "33"], a: "30" },
+        { q: "What number comes before 50?", o: ["51", "48", "49", "47"], a: "49" },
+        { q: "What number comes before 29?", o: ["30", "27", "28", "26"], a: "28" },
+        { q: "What number comes after 41?", o: ["40", "42", "43", "44"], a: "42" },
+        { q: "What number comes after 19?", o: ["18", "20", "21", "22"], a: "20" },
+        { q: "What number comes after 30?", o: ["29", "31", "32", "33"], a: "31" },
+        { q: "Counting down: 15, 14, 13, 12, ___?", o: ["10", "11", "14", "9"], a: "11" },
+        { q: "Counting down: 22, 21, 20, 19, ___?", o: ["17", "18", "21", "16"], a: "18" },
+        { q: "Counting down: 34, 33, 32, 31, ___?", o: ["30", "29", "28", "32"], a: "30" },
+        { q: "Counting down: 47, 46, 45, 44, ___?", o: ["42", "41", "43", "40"], a: "43" },
+        { q: "Alternate numbers starting from 1: 1, 3, 5, 7, ___?", o: ["8", "9", "10", "11"], a: "9" },
+        { q: "Alternate numbers starting from 2: 2, 4, 6, 8, ___?", o: ["9", "10", "11", "12"], a: "10" },
+        { q: "Complete the sequence: 1, 2, 3, 4, ___, 6", o: ["5", "7", "8", "9"], a: "5" },
+        { q: "Complete the sequence: 25, 26, 27, ___, 29", o: ["30", "28", "31", "26"], a: "28" },
+        { q: "What number comes after 11?", o: ["10", "12", "13", "14"], a: "12" },
+        { q: "What number comes after 39?", o: ["38", "40", "41", "42"], a: "40" }
+    ];
+
+    const quizContainer = document.getElementById('quiz-questions');
+    questions.forEach((item, index) => {
+        let optionsHTML = '';
+        item.o.forEach((opt, oIndex) => {
+            optionsHTML += `
+                <input type="radio" id="q${index}_o${oIndex}" name="q${index}" value="${opt}">
+                <label class="option" for="q${index}_o${oIndex}">${opt}</label>
+            `;
+        });
+        quizContainer.innerHTML += `
+            <div class="question">
+                <p>${index + 1}. ${item.q}</p>
+                <div class="options">${optionsHTML}</div>
+            </div>
+        `;
+    });
+
+    function calculateScore() {
+        let score = 0;
+        questions.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected && selected.value === item.a) {
+                score++;
+            }
+        });
+
+        document.getElementById('quizForm').style.display = 'none';
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+
+        let starsHTML = '';
+        for(let i=0; i<score; i++) {
+            starsHTML += '⭐';
+        }
+        document.getElementById('starContainer').innerHTML = starsHTML || 'None';
+        document.getElementById('scoreText').innerText = `Total Star Count: ${score} / 25`;
+        window.scrollTo(0, 0);
+    }
+</script>
+
+</body>
+</html>
